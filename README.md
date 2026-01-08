@@ -2,7 +2,7 @@
 
 A live-updating dashboard tracking the environmental cost of Artificial Intelligence.
 
-View Live Site (Replace with your actual URL after deploying)
+View Live Site: https://developwithjb.github.io/greenwatt-ai/
 
 📖 About
 
