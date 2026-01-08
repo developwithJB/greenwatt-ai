@@ -2,7 +2,7 @@
 
 A live-updating dashboard tracking the environmental cost of Artificial Intelligence.
 
-View Live Site: https://developwithjb.github.io/greenwatt-ai/
+View Live Site: https://developwithjb.github.io/greenwatt-ai
 
 📖 About
 
@@ -34,7 +34,7 @@ Under Source, select main (or master) branch.
 
 Click Save.
 
-Your site will be live at https://[your-username].github.io/ai-impact-tracker.
+Your site will be live at https://[your-username].github.io/greenwatt-ai.
 
 🛠️ Methodology & Logic
 
@@ -42,9 +42,37 @@ Since AI companies do not publish real-time consumption APIs, this site uses a C
 
 The JavaScript logic calculates usage based on the time of day relative to midnight (Local User Time) using these base coefficients:
 
-Water: ~500ml per 20-50 queries (Source: UCR Study).
+Citations & Sources
 
-Energy: ~0.3Wh per average query.
+Metric
+
+Calculation / Base
+
+Source
+
+Water Usage
+
+~500ml per 20-50 queries
+
+UCR Paper: "Making AI Less Thirsty"
+
+Energy
+
+~2.9Wh per GenAI query
+
+IEA Electricity 2024 Report
+
+Household Context
+
+29 kWh/day (US Avg)
+
+US Energy Information Administration
+
+Global Scale
+
+Comparison to Nations
+
+Joule / Cell Reports
 
 Note: These are global estimates and subject to change based on model optimizations.
 
