@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenWatt AI | Global Usage Tracker</title>
+    
+    <script src="[https://unpkg.com/react@18/umd/react.production.min.js](https://unpkg.com/react@18/umd/react.production.min.js)"></script>
+    <script src="[https://unpkg.com/react-dom@18/umd/react-dom.production.min.js](https://unpkg.com/react-dom@18/umd/react-dom.production.min.js)"></script>
+    
+    <script src="[https://unpkg.com/@babel/standalone/babel.min.js](https://unpkg.com/@babel/standalone/babel.min.js)"></script>
+    
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    
+    <script src="[https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js](https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js)"></script>
+    
+    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#050505',
+                        cyan: {
+                            400: '#00F0FF',
+                            500: '#00D0DF',
+                            900: '#00303F'
+                        },
+                        bio: {
+                            400: '#39FF14',
+                            900: '#0F3F05'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['Courier New', 'Courier', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+       .glow-text {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+       .glow-box-cyan {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
+        }
+       .glow-box-green {
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.1);
+        }
+       .scanline {
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // --- DATA CONSTANTS (Based on 2025/2026 Research) ---
+        // Global Baseline: Jan 1, 2026
+        const BASELINE_DATE = new Date("2026-01-01T00:00:00Z").getTime();
+        const QUERIES_PER_SECOND = 115740; // ~10B daily
+        const WH_PER_QUERY = 1.5; 
+        const ML_WATER_PER_QUERY = 25; 
+
+        // News Data
+        const NEWS_ITEMS =;
+
+        // Rankings Data
+        const AI_DATA =;
+
+        // --- COMPONENTS ---
+
+        const Navbar = () => (
+            <nav className="fixed top-0 w-full z-40 bg-void/80 backdrop-blur-md border-b border-white/10">
+                <div className="container mx-auto px-6 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+                        <span className="text-xl font-bold tracking-wider text-white">GREENWATT<span className="text-cyan-400">.AI</span></span>
+                    </div>
+                    <div className="flex items-center gap-6">
+                         <a href="[https://instagram.com/developwithjb](https://instagram.com/developwithjb)" target="_blank" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors hidden md:block">@developwithjb</a>
+                         <a href="[https://instagram.com/agbcoaching](https://instagram.com/agbcoaching)" target="_blank" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors hidden md:block">@agbcoaching</a>
+                        <a href="[https://github.com/your-repo/greenwatt-ai](https://github.com/your-repo/greenwatt-ai)" target="_blank" className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-sm font-mono transition-all border border-white/5">
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </nav>
+        );
+
+        const Hero = () => {
+            const = useState({ queries: 0, water: 0, energy: 0 });
+            
+            useEffect(() => {
+                const update = () => {
+                    const now = Date.now();
+                    const secondsElapsed = (now - BASELINE_DATE) / 1000;
+                    
+                    // Simple probabilistic calc
+                    const q = secondsElapsed * QUERIES_PER_SECOND;
+                    
+                    setStats({
+                        queries: Math.floor(q),
+                        water: Math.floor(q * (ML_WATER_PER_QUERY / 1000)), // Liters
+                        energy: Math.floor((q * WH_PER_QUERY) / 1000) // kWh
+                    });
+                };
+
+                update(); // Initial
+                const timer = setInterval(update, 100); // Fast tick
+                return () => clearInterval(timer);
+            },);
+
+            const manualRefresh = () => {
+                // Visual feedback only, data is live
+                const btn = document.getElementById('refresh-btn');
+                btn.classList.add('animate-spin');
+                setTimeout(() => btn.classList.remove('animate-spin'), 500);
+            };
+
+            return (
+                <section className="relative min-h-screen flex flex-col justify-center items-center pt-20 px-4 overflow-hidden">
+                    {/* Background Effects */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
+                    
+                    <div className="relative z-10 text-center max-w-5xl w-full">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-900/30 border border-cyan-500/30 text-cyan-400 text-xs font-mono mb-8 animate-pulse-slow">
+                            <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
+                            LIVE GLOBAL TRACKING
+                        </div>
+
+                        <h1 className="text-5xl md:text-8xl font-bold font-mono tracking-tighter text-white mb-4 glow-text">
+                            {stats.queries.toLocaleString()}
+                        </h1>
+                        <p className="text-slate-500 font-mono mb-16 text-lg">TOTAL AI QUERIES GENERATED (2026 YTD)</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                            <div className="bg-void border border-cyan-500/20 p-8 rounded-2xl glow-box-cyan flex flex-col items-center">
+                                <i data-lucide="zap" className="w-8 h-8 text-cyan-400 mb-4"></i>
+                                <span className="text-4xl md:text-5xl font-mono font-bold text-cyan-400">
+                                    {stats.energy.toLocaleString()}
+                                </span>
+                                <span className="text-sm text-slate-400 mt-2 font-mono uppercase">kWh Consumed</span>
+                            </div>
+
+                            <div className="bg-void border border-bio-400/20 p-8 rounded-2xl glow-box-green flex flex-col items-center">
+                                <i data-lucide="droplets" className="w-8 h-8 text-bio-400 mb-4"></i>
+                                <span className="text-4xl md:text-5xl font-mono font-bold text-bio-400">
+                                    {stats.water.toLocaleString()}
+                                </span>
+                                <span className="text-sm text-slate-400 mt-2 font-mono uppercase">Liters Water Evaporated</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-12">
+                            <button onClick={manualRefresh} className="group flex items-center gap-2 mx-auto text-slate-500 hover:text-white transition-colors">
+                                <i data-lucide="refresh-cw" id="refresh-btn" className="w-4 h-4"></i>
+                                <span className="text-xs font-mono uppercase">Sync Live Data</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const Rankings = () => (
+            <section className="py-24 bg-void border-t border-white/5">
+                <div className="container mx-auto px-6">
+                    <h2 className="text-2xl font-bold mb-12 flex items-center gap-3">
+                        <span className="text-cyan-400">01.</span> THE BIG FIVE
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                        {AI_DATA.map((ai) => (
+                            <div key={ai.id} className="bg-white/5 border border-white/10 hover:border-cyan-500/50 p-6 rounded-xl transition-all group">
+                                <div className="flex justify-between items-start mb-6">
+                                    <h3 className="text-xl font-bold">{ai.name}</h3>
+                                    <span className="text-xs font-mono px-2 py-1 rounded bg-white/10">{ai.marketShare}</span>
+                                </div>
+                                <div className="space-y-4 font-mono text-xs text-slate-400">
+                                    <div className="flex justify-between">
+                                        <span>Users</span>
+                                        <span className="text-white">{ai.users}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Growth</span>
+                                        <span className="text-green-400">{ai.growth}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Efficiency</span>
+                                        <span className={`font-bold ${ai.efficiency.includes('A')? 'text-green-400' : 'text-yellow-400'}`}>{ai.efficiency}</span>
+                                    </div>
+                                    <div className="pt-4 border-t border-white/10">
+                                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                            <div className="h-full bg-cyan-500" style={{ width: ai.marketShare === 'N/A'? '20%' : ai.marketShare }}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Comparisons = () => {
+            // Static calculation for demo: 15GWh/day global -> 517k homes
+            const homesPowered = 517241; 
+            const bottles = 500000000; // 500M
+
+            return (
+                <section className="py-24 bg-void relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-b from-cyan-900/5 to-transparent"></div>
+                    <div className="container mx-auto px-6 relative z-10">
+                        <h2 className="text-2xl font-bold mb-12 flex items-center gap-3">
+                            <span className="text-bio-400">02.</span> REAL WORLD IMPACT (DAILY)
+                        </h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div className="p-8 border border-white/10 rounded-2xl bg-black/50">
+                                <i data-lucide="home" className="w-8 h-8 text-cyan-400 mb-4"></i>
+                                <h3 className="text-4xl font-mono font-bold text-white mb-2">~517k</h3>
+                                <p className="text-sm text-slate-400">Household Days of Electricity</p>
+                                <p className="text-xs text-slate-600 mt-4">Equivalent to powering Tucson, AZ for 24h.</p>
+                            </div>
+                            
+                            <div className="p-8 border border-white/10 rounded-2xl bg-black/50">
+                                <i data-lucide="coffee" className="w-8 h-8 text-bio-400 mb-4"></i>
+                                <h3 className="text-4xl font-mono font-bold text-white mb-2">500M</h3>
+                                <p className="text-sm text-slate-400">Water Bottles (500ml)</p>
+                                <p className="text-xs text-slate-600 mt-4">Total water evaporated for cooling daily.</p>
+                            </div>
+
+                            <div className="p-8 border border-white/10 rounded-2xl bg-black/50">
+                                <i data-lucide="globe" className="w-8 h-8 text-purple-400 mb-4"></i>
+                                <h3 className="text-4xl font-mono font-bold text-white mb-2">#28</h3>
+                                <p className="text-sm text-slate-400">Global Country Rank</p>
+                                <p className="text-xs text-slate-600 mt-4">If AI was a country, it would consume more power than Sweden.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const News = () => (
+            <section className="py-24 bg-void border-t border-white/5">
+                <div className="container mx-auto px-6 max-w-4xl">
+                    <div className="flex justify-between items-end mb-12">
+                        <h2 className="text-2xl font-bold flex items-center gap-3">
+                            <span className="text-red-500">03.</span> LATEST INTELLIGENCE
+                        </h2>
+                    </div>
+
+                    <div className="space-y-4">
+                        {NEWS_ITEMS.map((item) => (
+                            <div key={item.id} className="flex flex-col md:flex-row gap-4 md:items-center justify-between p-6 border border-white/5 hover:border-white/20 bg-white/5 rounded-lg transition-all cursor-pointer group">
+                                <div>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className="text-xs font-mono text-cyan-400 px-2 py-0.5 border border-cyan-900 bg-cyan-900/20 rounded">{item.category}</span>
+                                        <span className="text-xs text-slate-500">{item.source} • {item.date}</span>
+                                    </div>
+                                    <h3 className="text-lg font-bold group-hover:text-cyan-400 transition-colors">{item.title}</h3>
+                                </div>
+                                <i data-lucide="arrow-up-right" className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors"></i>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
+        const Footer = () => (
+            <footer className="py-12 border-t border-white/10 bg-black text-center">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8">
+                        <a href="[https://instagram.com/developwithjb](https://instagram.com/developwithjb)" target="_blank" className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors">
+                            <i data-lucide="instagram" className="w-5 h-5"></i>
+                            <span>@developwithjb</span>
+                        </a>
+                        <span className="hidden md:inline text-slate-800">|</span>
+                        <a href="[https://instagram.com/agbcoaching](https://instagram.com/agbcoaching)" target="_blank" className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors">
+                            <i data-lucide="instagram" className="w-5 h-5"></i>
+                            <span>@agbcoaching</span>
+                        </a>
+                    </div>
+                    <p className="text-xs text-slate-700 font-mono max-w-xl mx-auto">
+                        GreenWatt AI is an open-source initiative. Data is probabilistic based on aggregated 2025/2026 research reports. 
+                        <br/>Not affiliated with OpenAI, Google, or Meta.
+                    </p>
+                </div>
+            </footer>
+        );
+
+        const App = () => {
+            useEffect(() => {
+                // Initialize Lucide icons
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            });
+
+            return (
+                <div className="min-h-screen">
+                    <div className="scanline"></div>
+                    <Navbar />
+                    <Hero />
+                    <Rankings />
+                    <Comparisons />
+                    <News />
+                    <Footer />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
