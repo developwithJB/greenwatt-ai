@@ -84,7 +84,7 @@
                     </div>
                 </div>
                 <div>
-                    <a href="https://github.com/YOUR_USERNAME/ai-impact-tracker" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border border-gray-600">
+                    <a href="https://github.com/developwithJB/greenwatt-ai" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border border-gray-600">
                         <i class="fa-brands fa-github"></i> Contribute
                     </a>
                 </div>
@@ -327,22 +327,38 @@
 
     <!-- Methodology -->
     <section id="methodology" class="py-16 border-t border-gray-800">
-        <div class="max-w-3xl mx-auto px-4 text-gray-400 text-sm">
+        <div class="max-w-4xl mx-auto px-4 text-gray-400 text-sm">
             <h3 class="text-white font-bold text-lg mb-4">Open Source Methodology & Sources</h3>
             <p class="mb-4">
                 This project is an open-source initiative to visualize the environmental impact of Large Language Models. 
                 Because real-time datacenter metrics are proprietary, the "Live Tracking" visualization is a simulation based on the following research-backed coefficients:
             </p>
-            <ul class="list-disc pl-5 space-y-2 mb-6">
-                <li><strong>Water Usage:</strong> Estimated at 500ml (1 standard water bottle) per 20-50 queries (Source: University of California, Riverside study).</li>
-                <li><strong>Electricity:</strong> Estimated at 0.3Wh per query average (Source: Joule/EPRI estimates).</li>
-                <li><strong>Comparison Data:</strong> Household electricity based on US EIA average of 29 kWh/day.</li>
-            </ul>
-            <p>
+            <div class="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                <ul class="space-y-4">
+                    <li class="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                        <span class="font-bold text-white w-32 shrink-0">Water Usage:</span>
+                        <span>Estimated at 500ml (1 bottle) per 20-50 queries. <br>
+                        <a href="https://arxiv.org/abs/2304.03271" target="_blank" class="text-neon-blue hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> Source: UCR "Making AI Less Thirsty" (2023)</a></span>
+                    </li>
+                    <li class="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                        <span class="font-bold text-white w-32 shrink-0">Electricity:</span>
+                        <span>Estimated at ~2.9Wh per Generative AI query (vs 0.3Wh for search). <br>
+                        <a href="https://www.iea.org/reports/electricity-2024" target="_blank" class="text-neon-blue hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> Source: IEA Electricity 2024 Report</a></span>
+                    </li>
+                    <li class="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                        <span class="font-bold text-white w-32 shrink-0">Comparisons:</span>
+                        <span>Household electricity based on US EIA average of 29 kWh/day. <br>
+                        <a href="https://www.eia.gov/tools/faqs/faq.php?id=97&t=3" target="_blank" class="text-neon-blue hover:underline"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> Source: US Energy Information Administration</a></span>
+                    </li>
+                </ul>
+            </div>
+            <p class="mt-6 text-center">
                 The goal is awareness, not exact scientific measurement. We invite data scientists to contribute better models via GitHub.
             </p>
-            <div class="mt-6">
-                <a href="https://github.com/developwithJB/greenwatt-ai" class="text-neon-blue hover:underline">View Source Code on GitHub &rarr;</a>
+            <div class="mt-4 text-center">
+                <a href="https://github.com/developwithJB/greenwatt-ai" class="text-white bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-full text-sm transition-colors inline-flex items-center gap-2">
+                    <i class="fa-brands fa-github"></i> View Source & Citations
+                </a>
             </div>
         </div>
     </section>
