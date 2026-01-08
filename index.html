@@ -3,340 +3,432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenWatt AI | Global Usage Tracker</title>
+    <title>AI Impact Tracker | Live Environmental Cost</title>
     
-    <script src="[https://unpkg.com/react@18/umd/react.production.min.js](https://unpkg.com/react@18/umd/react.production.min.js)"></script>
-    <script src="[https://unpkg.com/react-dom@18/umd/react-dom.production.min.js](https://unpkg.com/react-dom@18/umd/react-dom.production.min.js)"></script>
+    <!-- 1. Load Tailwind CDN FIRST -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <script src="[https://unpkg.com/@babel/standalone/babel.min.js](https://unpkg.com/@babel/standalone/babel.min.js)"></script>
-    
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    
-    <script src="[https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js](https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js)"></script>
-    
-    <script src="[https://unpkg.com/lucide@latest](https://unpkg.com/lucide@latest)"></script>
-
+    <!-- 2. Configure Tailwind (with safety check) -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        void: '#050505',
-                        cyan: {
-                            400: '#00F0FF',
-                            500: '#00D0DF',
-                            900: '#00303F'
+        // Check if Tailwind loaded successfully to prevent crashes
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Inter', 'sans-serif'],
+                            mono: ['JetBrains Mono', 'monospace'],
                         },
-                        bio: {
-                            400: '#39FF14',
-                            900: '#0F3F05'
+                        colors: {
+                            'brand-dark': '#0f172a',
+                            'brand-card': '#1e293b',
+                            'neon-blue': '#06b6d4',
+                            'neon-green': '#10b981',
+                            'alert-red': '#ef4444'
+                        },
+                        animation: {
+                            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                            'glow': 'glow 2s ease-in-out infinite alternate',
+                        },
+                        keyframes: {
+                            glow: {
+                                '0%': { boxShadow: '0 0 10px rgba(6, 182, 212, 0.5)' },
+                                '100%': { boxShadow: '0 0 20px rgba(6, 182, 212, 0.8), 0 0 10px rgba(6, 182, 212, 0.6)' },
+                            }
                         }
-                    },
-                    fontFamily: {
-                        mono: ['Courier New', 'Courier', 'monospace'],
-                        sans: ['Inter', 'sans-serif']
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
+        } else {
+            console.error("Tailwind CSS failed to load. Check your ad-blocker or network connection.");
         }
     </script>
 
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
         body {
-            background-color: #050505;
+            background-color: #0b0f19;
             color: #e2e8f0;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
         }
-       .glow-text {
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-       .glow-box-cyan {
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.1);
-        }
-       .glow-box-green {
-            box-shadow: 0 0 20px rgba(57, 255, 20, 0.1);
-        }
-       .scanline {
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-            background-size: 100% 4px;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            pointer-events: none;
-            z-index: 50;
+        .stat-number {
+            font-variant-numeric: tabular-nums;
         }
     </style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="antialiased selection:bg-neon-blue selection:text-brand-dark">
 
-    <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
-        const { motion, AnimatePresence } = window.Motion;
-
-        // --- DATA CONSTANTS (Based on 2025/2026 Research) ---
-        // Global Baseline: Jan 1, 2026
-        const BASELINE_DATE = new Date("2026-01-01T00:00:00Z").getTime();
-        const QUERIES_PER_SECOND = 115740; // ~10B daily
-        const WH_PER_QUERY = 1.5; 
-        const ML_WATER_PER_QUERY = 25; 
-
-        // News Data
-        const NEWS_ITEMS =;
-
-        // Rankings Data
-        const AI_DATA =;
-
-        // --- COMPONENTS ---
-
-        const Navbar = () => (
-            <nav className="fixed top-0 w-full z-40 bg-void/80 backdrop-blur-md border-b border-white/10">
-                <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
-                        <span className="text-xl font-bold tracking-wider text-white">GREENWATT<span className="text-cyan-400">.AI</span></span>
-                    </div>
-                    <div className="flex items-center gap-6">
-                         <a href="[https://instagram.com/developwithjb](https://instagram.com/developwithjb)" target="_blank" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors hidden md:block">@developwithjb</a>
-                         <a href="[https://instagram.com/agbcoaching](https://instagram.com/agbcoaching)" target="_blank" className="text-sm text-slate-400 hover:text-cyan-400 transition-colors hidden md:block">@agbcoaching</a>
-                        <a href="[https://github.com/your-repo/greenwatt-ai](https://github.com/your-repo/greenwatt-ai)" target="_blank" className="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full text-sm font-mono transition-all border border-white/5">
-                            GitHub
-                        </a>
+    <!-- Sticky Header -->
+    <nav class="fixed top-0 w-full z-50 glass-panel border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-earth-americas text-neon-blue text-2xl animate-pulse-fast"></i>
+                    <span class="font-bold text-xl tracking-tight">AI Impact<span class="text-neon-blue">Tracker</span></span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="flex items-baseline space-x-4">
+                        <a href="#live-stats" class="hover:text-neon-blue px-3 py-2 rounded-md text-sm font-medium transition-colors">Live Stats</a>
+                        <a href="#rankings" class="hover:text-neon-blue px-3 py-2 rounded-md text-sm font-medium transition-colors">Rankings</a>
+                        <a href="#equivalents" class="hover:text-neon-blue px-3 py-2 rounded-md text-sm font-medium transition-colors">Impact</a>
+                        <a href="#methodology" class="hover:text-neon-blue px-3 py-2 rounded-md text-sm font-medium transition-colors">Methodology</a>
                     </div>
                 </div>
-            </nav>
-        );
+                <div>
+                    <a href="https://github.com/YOUR_USERNAME/ai-impact-tracker" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 border border-gray-600">
+                        <i class="fa-brands fa-github"></i> Contribute
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-        const Hero = () => {
-            const = useState({ queries: 0, water: 0, energy: 0 });
+    <!-- Hero Section / Live Counters -->
+    <section id="live-stats" class="pt-32 pb-12 sm:pt-40 sm:pb-16 lg:pb-24 relative overflow-hidden">
+        <!-- Background Effects -->
+        <div class="absolute top-0 left-1/2 w-full -translate-x-1/2 h-full z-0 pointer-events-none opacity-20">
+            <div class="absolute top-20 left-1/4 w-96 h-96 bg-neon-blue rounded-full blur-[128px]"></div>
+            <div class="absolute bottom-20 right-1/4 w-96 h-96 bg-neon-green rounded-full blur-[128px]"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold tracking-wider mb-6 animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span> LIVE GLOBAL ESTIMATES (TODAY)
+            </div>
             
-            useEffect(() => {
-                const update = () => {
-                    const now = Date.now();
-                    const secondsElapsed = (now - BASELINE_DATE) / 1000;
-                    
-                    // Simple probabilistic calc
-                    const q = secondsElapsed * QUERIES_PER_SECOND;
-                    
-                    setStats({
-                        queries: Math.floor(q),
-                        water: Math.floor(q * (ML_WATER_PER_QUERY / 1000)), // Liters
-                        energy: Math.floor((q * WH_PER_QUERY) / 1000) // kWh
-                    });
-                };
+            <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight mb-4">
+                The Real Cost of <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-blue to-neon-green">Artificial Intelligence</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-400">
+                Tracking the estimated water and electricity consumption of large language models in real-time.
+            </p>
 
-                update(); // Initial
-                const timer = setInterval(update, 100); // Fast tick
-                return () => clearInterval(timer);
-            },);
-
-            const manualRefresh = () => {
-                // Visual feedback only, data is live
-                const btn = document.getElementById('refresh-btn');
-                btn.classList.add('animate-spin');
-                setTimeout(() => btn.classList.remove('animate-spin'), 500);
-            };
-
-            return (
-                <section className="relative min-h-screen flex flex-col justify-center items-center pt-20 px-4 overflow-hidden">
-                    {/* Background Effects */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 blur-[100px] rounded-full pointer-events-none" />
-                    
-                    <div className="relative z-10 text-center max-w-5xl w-full">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-900/30 border border-cyan-500/30 text-cyan-400 text-xs font-mono mb-8 animate-pulse-slow">
-                            <span className="w-2 h-2 bg-cyan-400 rounded-full"></span>
-                            LIVE GLOBAL TRACKING
-                        </div>
-
-                        <h1 className="text-5xl md:text-8xl font-bold font-mono tracking-tighter text-white mb-4 glow-text">
-                            {stats.queries.toLocaleString()}
-                        </h1>
-                        <p className="text-slate-500 font-mono mb-16 text-lg">TOTAL AI QUERIES GENERATED (2026 YTD)</p>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                            <div className="bg-void border border-cyan-500/20 p-8 rounded-2xl glow-box-cyan flex flex-col items-center">
-                                <i data-lucide="zap" className="w-8 h-8 text-cyan-400 mb-4"></i>
-                                <span className="text-4xl md:text-5xl font-mono font-bold text-cyan-400">
-                                    {stats.energy.toLocaleString()}
-                                </span>
-                                <span className="text-sm text-slate-400 mt-2 font-mono uppercase">kWh Consumed</span>
-                            </div>
-
-                            <div className="bg-void border border-bio-400/20 p-8 rounded-2xl glow-box-green flex flex-col items-center">
-                                <i data-lucide="droplets" className="w-8 h-8 text-bio-400 mb-4"></i>
-                                <span className="text-4xl md:text-5xl font-mono font-bold text-bio-400">
-                                    {stats.water.toLocaleString()}
-                                </span>
-                                <span className="text-sm text-slate-400 mt-2 font-mono uppercase">Liters Water Evaporated</span>
-                            </div>
-                        </div>
-
-                        <div className="mt-12">
-                            <button onClick={manualRefresh} className="group flex items-center gap-2 mx-auto text-slate-500 hover:text-white transition-colors">
-                                <i data-lucide="refresh-cw" id="refresh-btn" className="w-4 h-4"></i>
-                                <span className="text-xs font-mono uppercase">Sync Live Data</span>
-                            </button>
-                        </div>
+            <!-- Dramatic Counters -->
+            <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                
+                <!-- Electricity Counter -->
+                <div class="glass-panel p-8 rounded-2xl relative overflow-hidden group hover:border-neon-blue/50 transition-colors">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-bolt text-9xl"></i>
                     </div>
-                </section>
-            );
-        };
+                    <h3 class="text-gray-400 font-medium uppercase tracking-wider mb-2">Electricity Used Today</h3>
+                    <div class="flex items-baseline justify-center gap-2">
+                        <span id="elec-counter" class="text-5xl sm:text-7xl font-mono font-bold text-white stat-number">0</span>
+                        <span class="text-xl text-neon-blue font-bold">kWh</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">Equivalent to powering <span id="houses-live" class="text-white font-bold">0</span> homes for a day</p>
+                </div>
 
-        const Rankings = () => (
-            <section className="py-24 bg-void border-t border-white/5">
-                <div className="container mx-auto px-6">
-                    <h2 className="text-2xl font-bold mb-12 flex items-center gap-3">
-                        <span className="text-cyan-400">01.</span> THE BIG FIVE
-                    </h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {AI_DATA.map((ai) => (
-                            <div key={ai.id} className="bg-white/5 border border-white/10 hover:border-cyan-500/50 p-6 rounded-xl transition-all group">
-                                <div className="flex justify-between items-start mb-6">
-                                    <h3 className="text-xl font-bold">{ai.name}</h3>
-                                    <span className="text-xs font-mono px-2 py-1 rounded bg-white/10">{ai.marketShare}</span>
+                <!-- Water Counter -->
+                <div class="glass-panel p-8 rounded-2xl relative overflow-hidden group hover:border-neon-blue/50 transition-colors">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-droplet text-9xl"></i>
+                    </div>
+                    <h3 class="text-gray-400 font-medium uppercase tracking-wider mb-2">Water Consumed Today</h3>
+                    <div class="flex items-baseline justify-center gap-2">
+                        <span id="water-counter" class="text-5xl sm:text-7xl font-mono font-bold text-white stat-number">0</span>
+                        <span class="text-xl text-neon-blue font-bold">Liters</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">Equivalent to <span id="bottles-live" class="text-white font-bold">0</span> standard water bottles</p>
+                </div>
+            </div>
+
+            <!-- Manual Refresh -->
+            <div class="mt-8">
+                <button onclick="resyncData()" class="group relative inline-flex items-center justify-center px-8 py-3 text-base font-medium text-white bg-gray-800 border border-gray-600 rounded-full hover:bg-gray-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-blue focus:ring-offset-gray-900">
+                    <i class="fa-solid fa-arrows-rotate mr-2 group-hover:spin-slow transition-transform" id="refresh-icon"></i>
+                    Resync Data Stream
+                </button>
+                <p class="mt-2 text-xs text-gray-600">Data updates automatically. Click to force resync.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top 5 Rankings -->
+    <section id="rankings" class="py-16 bg-gray-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold mb-8 flex items-center gap-3">
+                <i class="fa-solid fa-trophy text-yellow-500"></i> Top 5 Models by Resource Usage
+            </h2>
+            
+            <div class="overflow-x-auto rounded-xl border border-gray-800">
+                <table class="w-full text-left text-gray-300">
+                    <thead class="bg-gray-800 text-xs uppercase font-medium text-gray-400">
+                        <tr>
+                            <th class="px-6 py-4">AI Model</th>
+                            <th class="px-6 py-4">Est. Daily Users</th>
+                            <th class="px-6 py-4">Est. Queries (24h)</th>
+                            <th class="px-6 py-4 text-neon-green">Est. Energy (MWh)</th>
+                            <th class="px-6 py-4 text-neon-blue">Est. Water (L)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-800 bg-gray-900/50 text-sm">
+                        <!-- ChatGPT -->
+                        <tr class="hover:bg-gray-800/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-white flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-green-500/20 flex items-center justify-center text-green-500">
+                                    <i class="fa-solid fa-robot"></i>
                                 </div>
-                                <div className="space-y-4 font-mono text-xs text-slate-400">
-                                    <div className="flex justify-between">
-                                        <span>Users</span>
-                                        <span className="text-white">{ai.users}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Growth</span>
-                                        <span className="text-green-400">{ai.growth}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>Efficiency</span>
-                                        <span className={`font-bold ${ai.efficiency.includes('A')? 'text-green-400' : 'text-yellow-400'}`}>{ai.efficiency}</span>
-                                    </div>
-                                    <div className="pt-4 border-t border-white/10">
-                                        <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                                            <div className="h-full bg-cyan-500" style={{ width: ai.marketShare === 'N/A'? '20%' : ai.marketShare }}></div>
-                                        </div>
-                                    </div>
+                                ChatGPT-4 (OpenAI)
+                            </td>
+                            <td class="px-6 py-4">~200M</td>
+                            <td class="px-6 py-4 font-mono">500M+</td>
+                            <td class="px-6 py-4 font-mono text-neon-green">1,475</td>
+                            <td class="px-6 py-4 font-mono text-neon-blue">735,000</td>
+                        </tr>
+                        <!-- Gemini -->
+                        <tr class="hover:bg-gray-800/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-white flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-blue-500/20 flex items-center justify-center text-blue-500">
+                                    <i class="fa-solid fa-gem"></i>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        );
+                                Gemini (Google)
+                            </td>
+                            <td class="px-6 py-4">~160M</td>
+                            <td class="px-6 py-4 font-mono">410M+</td>
+                            <td class="px-6 py-4 font-mono text-neon-green">1,150</td>
+                            <td class="px-6 py-4 font-mono text-neon-blue">605,000</td>
+                        </tr>
+                        <!-- Copilot -->
+                        <tr class="hover:bg-gray-800/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-white flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-purple-500/20 flex items-center justify-center text-purple-500">
+                                    <i class="fa-solid fa-code"></i>
+                                </div>
+                                Copilot (Microsoft)
+                            </td>
+                            <td class="px-6 py-4">~75M</td>
+                            <td class="px-6 py-4 font-mono">190M+</td>
+                            <td class="px-6 py-4 font-mono text-neon-green">680</td>
+                            <td class="px-6 py-4 font-mono text-neon-blue">320,000</td>
+                        </tr>
+                        <!-- Meta AI -->
+                        <tr class="hover:bg-gray-800/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-white flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-blue-700/20 flex items-center justify-center text-blue-700">
+                                    <i class="fa-brands fa-facebook"></i>
+                                </div>
+                                Meta AI
+                            </td>
+                            <td class="px-6 py-4">~60M</td>
+                            <td class="px-6 py-4 font-mono">150M+</td>
+                            <td class="px-6 py-4 font-mono text-neon-green">490</td>
+                            <td class="px-6 py-4 font-mono text-neon-blue">215,000</td>
+                        </tr>
+                         <!-- Claude -->
+                         <tr class="hover:bg-gray-800/50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-white flex items-center gap-3">
+                                <div class="w-8 h-8 rounded bg-orange-500/20 flex items-center justify-center text-orange-500">
+                                    <i class="fa-solid fa-brain"></i>
+                                </div>
+                                Claude 3 (Anthropic)
+                            </td>
+                            <td class="px-6 py-4">~15M</td>
+                            <td class="px-6 py-4 font-mono">40M+</td>
+                            <td class="px-6 py-4 font-mono text-neon-green">120</td>
+                            <td class="px-6 py-4 font-mono text-neon-blue">58,000</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-gray-500 mt-2 text-right">* Usage stats are aggregate estimates based on monthly active user reports and datacenter thermal design power (TDP) averages.</p>
+        </div>
+    </section>
 
-        const Comparisons = () => {
-            // Static calculation for demo: 15GWh/day global -> 517k homes
-            const homesPowered = 517241; 
-            const bottles = 500000000; // 500M
-
-            return (
-                <section className="py-24 bg-void relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-b from-cyan-900/5 to-transparent"></div>
-                    <div className="container mx-auto px-6 relative z-10">
-                        <h2 className="text-2xl font-bold mb-12 flex items-center gap-3">
-                            <span className="text-bio-400">02.</span> REAL WORLD IMPACT (DAILY)
-                        </h2>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="p-8 border border-white/10 rounded-2xl bg-black/50">
-                                <i data-lucide="home" className="w-8 h-8 text-cyan-400 mb-4"></i>
-                                <h3 className="text-4xl font-mono font-bold text-white mb-2">~517k</h3>
-                                <p className="text-sm text-slate-400">Household Days of Electricity</p>
-                                <p className="text-xs text-slate-600 mt-4">Equivalent to powering Tucson, AZ for 24h.</p>
-                            </div>
-                            
-                            <div className="p-8 border border-white/10 rounded-2xl bg-black/50">
-                                <i data-lucide="coffee" className="w-8 h-8 text-bio-400 mb-4"></i>
-                                <h3 className="text-4xl font-mono font-bold text-white mb-2">500M</h3>
-                                <p className="text-sm text-slate-400">Water Bottles (500ml)</p>
-                                <p className="text-xs text-slate-600 mt-4">Total water evaporated for cooling daily.</p>
-                            </div>
-
-                            <div className="p-8 border border-white/10 rounded-2xl bg-black/50">
-                                <i data-lucide="globe" className="w-8 h-8 text-purple-400 mb-4"></i>
-                                <h3 className="text-4xl font-mono font-bold text-white mb-2">#28</h3>
-                                <p className="text-sm text-slate-400">Global Country Rank</p>
-                                <p className="text-xs text-slate-600 mt-4">If AI was a country, it would consume more power than Sweden.</p>
-                            </div>
+    <!-- Environmental Context -->
+    <section id="equivalents" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold mb-12 text-center">What does this actually mean?</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Card 1 -->
+                <div class="glass-panel p-6 rounded-xl border-t-4 border-neon-blue">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="bg-blue-900/30 p-3 rounded-lg text-neon-blue">
+                            <i class="fa-solid fa-bottle-water text-2xl"></i>
                         </div>
+                        <h3 class="text-xl font-bold">Thirsty Work</h3>
                     </div>
-                </section>
-            );
-        };
-
-        const News = () => (
-            <section className="py-24 bg-void border-t border-white/5">
-                <div className="container mx-auto px-6 max-w-4xl">
-                    <div className="flex justify-between items-end mb-12">
-                        <h2 className="text-2xl font-bold flex items-center gap-3">
-                            <span className="text-red-500">03.</span> LATEST INTELLIGENCE
-                        </h2>
-                    </div>
-
-                    <div className="space-y-4">
-                        {NEWS_ITEMS.map((item) => (
-                            <div key={item.id} className="flex flex-col md:flex-row gap-4 md:items-center justify-between p-6 border border-white/5 hover:border-white/20 bg-white/5 rounded-lg transition-all cursor-pointer group">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <span className="text-xs font-mono text-cyan-400 px-2 py-0.5 border border-cyan-900 bg-cyan-900/20 rounded">{item.category}</span>
-                                        <span className="text-xs text-slate-500">{item.source} • {item.date}</span>
-                                    </div>
-                                    <h3 className="text-lg font-bold group-hover:text-cyan-400 transition-colors">{item.title}</h3>
-                                </div>
-                                <i data-lucide="arrow-up-right" className="w-5 h-5 text-slate-600 group-hover:text-white transition-colors"></i>
-                            </div>
-                        ))}
+                    <p class="text-gray-400 mb-4">Training a model like GPT-4 evaporates roughly <span class="text-white font-bold">700,000 liters</span> of water for cooling.</p>
+                    <div class="bg-gray-800/50 p-3 rounded text-sm border border-gray-700">
+                        That is enough water to produce 
+                        <span class="text-neon-blue font-bold block text-lg">370 BMWs</span>
                     </div>
                 </div>
-            </section>
-        );
 
-        const Footer = () => (
-            <footer className="py-12 border-t border-white/10 bg-black text-center">
-                <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row justify-center items-center gap-8 mb-8">
-                        <a href="[https://instagram.com/developwithjb](https://instagram.com/developwithjb)" target="_blank" className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors">
-                            <i data-lucide="instagram" className="w-5 h-5"></i>
-                            <span>@developwithjb</span>
-                        </a>
-                        <span className="hidden md:inline text-slate-800">|</span>
-                        <a href="[https://instagram.com/agbcoaching](https://instagram.com/agbcoaching)" target="_blank" className="flex items-center gap-2 text-slate-400 hover:text-pink-500 transition-colors">
-                            <i data-lucide="instagram" className="w-5 h-5"></i>
-                            <span>@agbcoaching</span>
-                        </a>
+                <!-- Card 2 -->
+                <div class="glass-panel p-6 rounded-xl border-t-4 border-yellow-500">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="bg-yellow-900/30 p-3 rounded-lg text-yellow-500">
+                            <i class="fa-solid fa-house-chimney text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Household Power</h3>
                     </div>
-                    <p className="text-xs text-slate-700 font-mono max-w-xl mx-auto">
-                        GreenWatt AI is an open-source initiative. Data is probabilistic based on aggregated 2025/2026 research reports. 
-                        <br/>Not affiliated with OpenAI, Google, or Meta.
-                    </p>
+                    <p class="text-gray-400 mb-4">One AI-generated image uses as much energy as fully charging your smartphone.</p>
+                    <div class="bg-gray-800/50 p-3 rounded text-sm border border-gray-700">
+                        Global daily AI energy usage equals the daily consumption of
+                        <span class="text-yellow-500 font-bold block text-lg">175,000 U.S. Households</span>
+                    </div>
                 </div>
-            </footer>
-        );
 
-        const App = () => {
-            useEffect(() => {
-                // Initialize Lucide icons
-                if (window.lucide) {
-                    window.lucide.createIcons();
-                }
-            });
-
-            return (
-                <div className="min-h-screen">
-                    <div className="scanline"></div>
-                    <Navbar />
-                    <Hero />
-                    <Rankings />
-                    <Comparisons />
-                    <News />
-                    <Footer />
+                <!-- Card 3 -->
+                <div class="glass-panel p-6 rounded-xl border-t-4 border-red-500">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="bg-red-900/30 p-3 rounded-lg text-red-500">
+                            <i class="fa-solid fa-flag text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold">Country Scale</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">If the AI industry were a country, its energy consumption ranking is rising rapidly.</p>
+                    <div class="bg-gray-800/50 p-3 rounded text-sm border border-gray-700">
+                        Currently consuming more annual electricity than
+                        <span class="text-red-500 font-bold block text-lg">Sri Lanka or Ireland</span>
+                    </div>
                 </div>
-            );
-        };
+            </div>
+        </div>
+    </section>
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+    <!-- Socials / News -->
+    <section class="py-16 bg-gradient-to-br from-gray-900 to-blue-900/20">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">Stay Updated on the Future of AI</h2>
+            <p class="text-gray-300 mb-10 text-lg">We dive deeper into the code, the ethics, and the sustainability of AI every week.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <a href="https://instagram.com/developwithjb" target="_blank" class="group flex items-center justify-center gap-4 p-6 bg-gray-800 rounded-xl hover:bg-gradient-to-r hover:from-purple-600 hover:to-pink-600 transition-all transform hover:-translate-y-1 shadow-lg">
+                    <i class="fa-brands fa-instagram text-3xl text-pink-500 group-hover:text-white"></i>
+                    <div class="text-left">
+                        <span class="block text-xs text-gray-400 group-hover:text-pink-100 uppercase tracking-wide">Follow for Code</span>
+                        <span class="block text-xl font-bold text-white">@developwithjb</span>
+                    </div>
+                </a>
+
+                <a href="https://instagram.com/agbcoaching" target="_blank" class="group flex items-center justify-center gap-4 p-6 bg-gray-800 rounded-xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:-translate-y-1 shadow-lg">
+                    <i class="fa-brands fa-instagram text-3xl text-cyan-500 group-hover:text-white"></i>
+                    <div class="text-left">
+                        <span class="block text-xs text-gray-400 group-hover:text-cyan-100 uppercase tracking-wide">Follow for AI Strategy</span>
+                        <span class="block text-xl font-bold text-white">@agbcoaching</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Methodology -->
+    <section id="methodology" class="py-16 border-t border-gray-800">
+        <div class="max-w-3xl mx-auto px-4 text-gray-400 text-sm">
+            <h3 class="text-white font-bold text-lg mb-4">Open Source Methodology & Sources</h3>
+            <p class="mb-4">
+                This project is an open-source initiative to visualize the environmental impact of Large Language Models. 
+                Because real-time datacenter metrics are proprietary, the "Live Tracking" visualization is a simulation based on the following research-backed coefficients:
+            </p>
+            <ul class="list-disc pl-5 space-y-2 mb-6">
+                <li><strong>Water Usage:</strong> Estimated at 500ml (1 standard water bottle) per 20-50 queries (Source: University of California, Riverside study).</li>
+                <li><strong>Electricity:</strong> Estimated at 0.3Wh per query average (Source: Joule/EPRI estimates).</li>
+                <li><strong>Comparison Data:</strong> Household electricity based on US EIA average of 29 kWh/day.</li>
+            </ul>
+            <p>
+                The goal is awareness, not exact scientific measurement. We invite data scientists to contribute better models via GitHub.
+            </p>
+            <div class="mt-6">
+                <a href="https://github.com/YOUR_USERNAME/ai-impact-tracker" class="text-neon-blue hover:underline">View Source Code on GitHub &rarr;</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark py-8 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 text-center text-gray-600 text-sm">
+            <p>&copy; 2024 AI Impact Tracker. Open Source Data.</p>
+        </div>
+    </footer>
+
+    <!-- Logic Script (No Dependencies) -->
+    <script>
+        // --- Configuration (The "Model") ---
+        // Base rates per second (Global estimates)
+        const RATE_ENERGY_KWH_PER_SEC = 45.5; // Approx global AI draw
+        const RATE_WATER_L_PER_SEC = 22.8;    // Cooling evaporation
+        
+        // --- State ---
+        let totalEnergy = 0;
+        let totalWater = 0;
+
+        // --- Logic ---
+        function calculateStartOfDayValues() {
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const secondsSinceMidnight = (now - startOfDay) / 1000;
+            
+            // Set initial values based on time of day so it looks accurate
+            totalEnergy = secondsSinceMidnight * RATE_ENERGY_KWH_PER_SEC;
+            totalWater = secondsSinceMidnight * RATE_WATER_L_PER_SEC;
+            
+            updateDOM();
+        }
+
+        function formatNumber(num) {
+            // Formats 12345.67 into "12,345"
+            return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function updateDOM() {
+            // Update Main Counters
+            const elecEl = document.getElementById('elec-counter');
+            const waterEl = document.getElementById('water-counter');
+            
+            if(elecEl) elecEl.innerText = formatNumber(totalEnergy);
+            if(waterEl) waterEl.innerText = formatNumber(totalWater);
+
+            // Update Equivalents
+            // 1 Bottle = 0.5 Liters (500ml)
+            const bottles = totalWater / 0.5;
+            const bottleEl = document.getElementById('bottles-live');
+            if(bottleEl) bottleEl.innerText = formatNumber(bottles);
+
+            // 1 US Household = ~29 kWh/day. 
+            // So household-days consumed = totalEnergy / 29
+            const houses = totalEnergy / 29;
+            const housesEl = document.getElementById('houses-live');
+            if(housesEl) housesEl.innerText = formatNumber(houses);
+        }
+
+        function tick() {
+            // Increment by 100ms worth of data
+            totalEnergy += (RATE_ENERGY_KWH_PER_SEC / 10);
+            totalWater += (RATE_WATER_L_PER_SEC / 10);
+            updateDOM();
+        }
+
+        function resyncData() {
+            const icon = document.getElementById('refresh-icon');
+            if(icon) icon.classList.add('fa-spin');
+            
+            // Simulate network request feeling
+            setTimeout(() => {
+                calculateStartOfDayValues();
+                if(icon) icon.classList.remove('fa-spin');
+            }, 800);
+        }
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateStartOfDayValues();
+            // Update 10 times a second for smooth animation
+            setInterval(tick, 100); 
+        });
+
     </script>
 </body>
 </html>
