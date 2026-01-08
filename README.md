@@ -42,39 +42,12 @@ Since AI companies do not publish real-time consumption APIs, this site uses a C
 
 The JavaScript logic calculates usage based on the time of day relative to midnight (Local User Time) using these base coefficients:
 
-Citations & Sources
-
-Metric
-
-Calculation / Base
-
-Source
-
-Water Usage
-
-~500ml per 20-50 queries
-
-UCR Paper: "Making AI Less Thirsty"
-
-Energy
-
-~2.9Wh per GenAI query
-
-IEA Electricity 2024 Report
-
-Household Context
-
-29 kWh/day (US Avg)
-
-US Energy Information Administration
-
-Global Scale
-
-Comparison to Nations
-
-Joule / Cell Reports
-
-Note: These are global estimates and subject to change based on model optimizations.
+Water Usage: Estimated at 500ml (1 bottle) per 20-50 queries.
+Source: UCR "Making AI Less Thirsty" (2023)
+Electricity: Estimated at ~2.9Wh per Generative AI query (vs 0.3Wh for search).
+Source: IEA Electricity 2024 Report
+Comparisons: Household electricity based on US EIA average of 29 kWh/day.
+Source: US Energy Information Administration
 
 🤝 How to Contribute
 
